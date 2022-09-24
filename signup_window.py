@@ -36,22 +36,36 @@ def signup_window():
             email = email_get.get()
             password = password_get.get()
             
-            if len(username) != 0 and len(email) != 0 and len(password) != 0:
-                if re.search(regex, email):
-                    if len(username) >=3:
-                        if len(password) >= 6:
-                            user = cur.execute('SELECT username FROM Login WHERE username=?', (username,)).fetchone()
-                            if type(user) == NoneType:
-                                cur_email = cur.execute('SELECT email FROM Login WHERE email = ?', (email,)).fetchone()
-                                if type(cur_email) == NoneType:
-                                    cur.execute('INSERT INTO Login(username, password, email) VALUES(?,?,?)', (username, password, email))
-                                    success_window(1)
-                                else: print('Email already exists.')
-                            else: print('Username is already taken.')
-                        else: print('Password must be atleast 6 Characters long.')
-                    else: print('Username must be atleast 3 Characters long.')
-                else: print('Invalid email.')
-            else: print('Username, Password and Email are required.')
+            if len(username) == 0 or len(email) == 0 or len(password) == 0:
+                print('Username, Password and Email are required.')
+                return
+
+            if re.search(regex, email) is None:
+                print('Invalid email.')
+                return
+
+            if len(username) < 3:
+                print('Username must be atleast 3 Characters long.')
+                return
+            
+            if len(password) < 6:
+                print('Password must be atleast 6 Characters long.')
+                return
+            
+            user = cur.execute('SELECT username FROM Login WHERE username=?', (username,)).fetchone()
+
+            if type(user) != NoneType:
+                print('Username is already taken.')
+                return
+            
+            cur_email = cur.execute('SELECT email FROM Login WHERE email = ?', (email,)).fetchone()
+            
+            if type(cur_email) != NoneType:
+                print('Email already exists.')
+                return
+            
+            cur.execute('INSERT INTO Login(username, password, email) VALUES(?,?,?)', (username, password, email))
+            success_window(1)
             
     ttk.Button(mainframe, text='Submit', command=submit_values).grid(column=4, row=2, sticky=(W,E))
     
